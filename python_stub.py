@@ -48,7 +48,18 @@ def install_pip_and_modules(module_names):
         with open(os.path.basename(url), 'wb') as local_file:
             local_file.write(remote_file.read())
 
+    def pip_install_module(module_name, as_user):
+        cmd = sys.executable + ' -m pip install ' + module_name
+
+        if as_user:
+            cmd += ' --user'
+
+        print('Executing: ' + cmd)
+        os.system(cmd)
+
     in_virtualenv = 'VIRTUAL_ENV' in os.environ
+    is_root = os.geteuid() == 0
+    install_as_user = not in_virtualenv and not is_root
 
     try:
         import pip
@@ -91,13 +102,7 @@ def install_pip_and_modules(module_names):
         except ImportError as x4:
             print(x4)
 
-            if in_virtualenv:
-                cmd = sys.executable + ' -m pip install dulwich'
-            else:
-                cmd = sys.executable + ' -m pip install dulwich --user'
-
-            print('Executing: ' + cmd)
-            os.system(cmd)
+            pip_install_module('dulwich', install_as_user)
 
     for imodule_name in module_names_list:
         try:
@@ -122,24 +127,11 @@ def install_pip_and_modules(module_names):
                     pass
 
                 dulwich.porcelain.clone(pkg_url)
-
-                if in_virtualenv:
-                    cmd = sys.executable + ' -m pip install ' + pkg_basename
-                else:
-                    cmd = sys.executable + ' -m pip install ' + pkg_basename + ' --user'
-
-                print('Executing: ' + cmd)
-                os.system(cmd)
+                pip_install_module(pkg_basename, install_as_user)
 
                 shutil.rmtree(os.path.join(cwd, pkg_basename))
             else:
-                if in_virtualenv:
-                    cmd = sys.executable + ' -m pip install ' + imodule_pip_name
-                else:
-                    cmd = sys.executable + ' -m pip install ' + imodule_pip_name + ' --user'
-
-                print('Executing: ' + cmd)
-                os.system(cmd)
+                pip_install_module(imodule_pip_name, install_as_user)
             try:
                 globals()[imodule_name] = importlib.import_module(imodule_name)
             except ImportError as x3:
