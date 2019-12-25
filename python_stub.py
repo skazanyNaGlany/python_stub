@@ -28,6 +28,7 @@ SOFTWARE.
 
 def install_pip_and_modules(module_names):
     import os
+    import os.path
     import sys
     import importlib
     import shutil
@@ -57,9 +58,14 @@ def install_pip_and_modules(module_names):
         print('Executing: ' + cmd)
         os.system(cmd)
 
-    in_virtualenv = 'VIRTUAL_ENV' in os.environ
-    is_root = hasattr(os, 'geteuid') and os.geteuid() == 0
-    install_as_user = not in_virtualenv and not is_root
+    def determine_install_as_user():
+        in_virtualenv = 'VIRTUAL_ENV' in os.environ
+        is_root = hasattr(os, 'geteuid') and os.geteuid() == 0
+        is_windows = sys.platform.startswith('win')
+
+        return not in_virtualenv and not is_root and not is_windows
+
+    install_as_user = determine_install_as_user()
 
     try:
         import pip
@@ -70,10 +76,10 @@ def install_pip_and_modules(module_names):
 
         print('Installing: pip')
 
-        if in_virtualenv:
-            cmd = sys.executable + ' get-pip.py'
-        else:
-            cmd = sys.executable + ' get-pip.py --user'
+        cmd = sys.executable + ' get-pip.py'
+
+        if install_as_user:
+            cmd += ' --user'
 
         print('Executing: ' + cmd)
 
@@ -103,6 +109,14 @@ def install_pip_and_modules(module_names):
             print(x4)
 
             pip_install_module('dulwich', install_as_user)
+
+            try:
+                import dulwich
+            except ImportError as x6:
+                print(x6)
+
+                print('Unable to install dulwich')
+                exit(1)
 
     for imodule_name in module_names_list:
         try:
