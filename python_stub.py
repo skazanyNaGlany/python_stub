@@ -58,7 +58,7 @@ def install_pip_and_modules(module_names):
         os.system(cmd)
 
     in_virtualenv = 'VIRTUAL_ENV' in os.environ
-    is_root = os.geteuid() == 0
+    is_root = hasattr(os, 'geteuid') and os.geteuid() == 0
     install_as_user = not in_virtualenv and not is_root
 
     try:
@@ -129,7 +129,10 @@ def install_pip_and_modules(module_names):
                 dulwich.porcelain.clone(pkg_url)
                 pip_install_module(pkg_basename, install_as_user)
 
-                shutil.rmtree(os.path.join(cwd, pkg_basename))
+                try:
+                    shutil.rmtree(os.path.join(cwd, pkg_basename))
+                except Exception as x5:
+                    print(x5)
             else:
                 pip_install_module(imodule_pip_name, install_as_user)
             try:
