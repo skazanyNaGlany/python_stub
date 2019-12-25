@@ -158,18 +158,21 @@ def install_pip_and_modules(module_names):
                 exit(1)
 
 
-def main():
-    # this will install pip and selenium
-    # and import selenium
-    install_pip_and_modules({
-        'selenium': 'selenium',
-        'mouse': 'git+https://github.com/boppreh/mouse'
-        # 'mouse': 'mouse'
-    })
+# this will install pip and selenium
+# and import selenium
+install_pip_and_modules({
+    'selenium': 'selenium',
+    'mouse': 'git+https://github.com/boppreh/mouse'
+    # 'mouse': 'mouse'
+})
 
-    # modules installed and imported
-    # rest of your code goes below
-    # this lines
+# modules installed and imported
+# rest of your code goes below
+# this lines
+
+
+def main():
+    pass
 
 
 if __name__ == '__main__':
