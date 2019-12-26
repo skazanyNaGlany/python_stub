@@ -26,7 +26,7 @@ SOFTWARE.
 """
 
 
-def install_pip_and_modules(module_names):
+def install_pip_and_modules(package_names):
     import os
     import os.path
     import sys
@@ -125,13 +125,12 @@ def install_pip_and_modules(module_names):
             exit(1)
 
     installed_packages = get_installed_packages()
-    module_names_list = module_names.keys()
     cwd = os.getcwd()
 
     # check if we need Dulwich - pure Python Git implementation
     need_dulwich = False
-    for imodule_name2 in module_names:
-        if module_names[imodule_name2].startswith('git+https://'):
+    for ipackage_name2 in package_names:
+        if ipackage_name2.startswith('git+https://'):
             need_dulwich = True
             break
 
@@ -149,18 +148,17 @@ def install_pip_and_modules(module_names):
             restart()
 
     # install packages
-    for imodule_name in module_names_list:
-        imodule_pip_name = module_names[imodule_name]
-        imodule_pip_basename = os.path.basename(module_names[imodule_name])
+    for ipackage_name in package_names:
+        imodule_pip_basename = os.path.basename(ipackage_name)
 
         if not imodule_pip_basename in installed_packages:
-            print('Installing: {} ({})'.format(imodule_name, imodule_pip_name))
+            print('Installing: {} ({})'.format(ipackage_name, ipackage_name))
 
-            if imodule_pip_name.startswith('git+https://'):
+            if ipackage_name.startswith('git+https://'):
                 import dulwich.porcelain
 
                 # just remove git+ and install
-                pkg_url = imodule_pip_name[4:]
+                pkg_url = ipackage_name[4:]
                 pkg_basename = os.path.basename(pkg_url)
 
                 try:
@@ -177,13 +175,13 @@ def install_pip_and_modules(module_names):
                 except Exception as x5:
                     print(x5)
             else:
-                pip_install_module(imodule_pip_name, install_as_user)
+                pip_install_module(ipackage_name, install_as_user)
                 count_installed_packages += 1
 
     installed_packages = get_installed_packages()
 
-    for imodule_name2 in module_names_list:
-        imodule_pip_name2 = os.path.basename(module_names[imodule_name2])
+    for ipackage_name2 in package_names:
+        imodule_pip_name2 = os.path.basename(ipackage_name2)
 
         if imodule_pip_name2 not in installed_packages:
             print('Unable to install ' + imodule_pip_name2)
@@ -194,10 +192,10 @@ def install_pip_and_modules(module_names):
 
 
 # this will install some packages
-install_pip_and_modules({
-    'selenium': 'selenium',
-    'mouse': 'git+https://github.com/boppreh/mouse'
-})
+install_pip_and_modules([
+    'selenium',
+    'git+https://github.com/boppreh/mouse'
+])
 
 # packages installed
 # rest of your code goes below
